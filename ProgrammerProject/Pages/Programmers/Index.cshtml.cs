@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using ProgrammerProject.IRepository;
 using ProgrammerProject.Models;
+using System.Globalization;
 
 namespace ProgrammerProject.Pages.Programmers
 {
@@ -19,6 +20,9 @@ namespace ProgrammerProject.Pages.Programmers
         [BindProperty]
         public Programmer NewProgrammer { get; set; } = new();
 
+        [BindProperty]
+        public Programmer EditProgrammer { get; set; } = new();
+
         public async Task OnGetAsync()
         {
             Programmers = await _repository.GetAllProgrammersAsync();
@@ -30,30 +34,127 @@ namespace ProgrammerProject.Pages.Programmers
             return new JsonResult(programmers);
         }
 
-        public async Task<IActionResult> OnPostAddProgrammerAsync()
+        public async Task<IActionResult> OnGetProgrammerAsync(int id)
         {
-            if (!ModelState.IsValid)
+            var programmer = await _repository.GetProgrammerByIdAsync(id);
+            if (programmer == null)
             {
-                var errors = ModelState
-                    .Where(x => x.Value.Errors.Count > 0)
-                    .Select(x => new
-                    {
-                        Field = x.Key,
-                        Errors = x.Value.Errors.Select(e => e.ErrorMessage)
-                    });
+                return new JsonResult(new { success = false, message = "Programmer not found" });
+            }
+            return new JsonResult(new { success = true, data = programmer });
+        }
 
-                return new JsonResult(new { success = false, errors });
+        public async Task<IActionResult> OnPostAddProgrammerAsync(
+            string name,
+            string dob,
+            string doj,
+            string sex,
+            string prof1,
+            string? prof2,
+            decimal salary)
+        {
+            // Parse Date of Birth
+            if (!DateTime.TryParseExact(dob, "dd-MM-yyyy", CultureInfo.InvariantCulture,
+                                        DateTimeStyles.None, out DateTime dobDt))
+            {
+                return new JsonResult(new { success = false, message = "Invalid Date of Birth format" });
             }
 
-            try
+            // Parse Date of Joining
+            if (!DateTime.TryParseExact(doj, "dd-MM-yyyy", CultureInfo.InvariantCulture,
+                                        DateTimeStyles.None, out DateTime dojDt))
             {
-                var newId = await _repository.AddProgrammerAsync(NewProgrammer);
-                return new JsonResult(new { success = true, id = newId });
+                return new JsonResult(new { success = false, message = "Invalid Date of Joining format" });
             }
-            catch (Exception ex)
+
+            // Basic validation
+            if (string.IsNullOrWhiteSpace(name))
+                return new JsonResult(new { success = false, message = "Name is required" });
+            if (string.IsNullOrWhiteSpace(sex))
+                return new JsonResult(new { success = false, message = "Gender is required" });
+            if (string.IsNullOrWhiteSpace(prof1))
+                return new JsonResult(new { success = false, message = "Primary Profession is required" });
+            if (salary <= 0)
+                return new JsonResult(new { success = false, message = "Salary must be greater than zero" });
+
+            var programmer = new Programmer
             {
-                return new JsonResult(new { success = false, message = ex.Message });
+                NAME = name,
+                DOB = dobDt,
+                DOJ = dojDt,
+                SEX = sex,
+                PROF1 = prof1,
+                PROF2 = prof2,
+                SALARY = salary
+            };
+
+            var newId = await _repository.AddProgrammerAsync(programmer);
+            return new JsonResult(new { success = true, id = newId });
+        }
+
+        public async Task<IActionResult> OnPostUpdateProgrammerAsync(
+            int id,
+            string name,
+            string dob,      // e.g. "31-08-2025"
+            string doj,      // e.g. "10-03-2020"
+            string sex,
+            string prof1,
+            string? prof2,
+            decimal salary)
+        {
+            // Parse Date of Birth
+            if (!DateTime.TryParseExact(dob, "dd-MM-yyyy", CultureInfo.InvariantCulture,
+                                        DateTimeStyles.None, out DateTime dobDt))
+            {
+                return new JsonResult(new { success = false, message = "Invalid Date of Birth format" });
             }
+
+            // Parse Date of Joining
+            if (!DateTime.TryParseExact(doj, "dd-MM-yyyy", CultureInfo.InvariantCulture,
+                                        DateTimeStyles.None, out DateTime dojDt))
+            {
+                return new JsonResult(new { success = false, message = "Invalid Date of Joining format" });
+            }
+
+            // Basic validation
+            if (string.IsNullOrWhiteSpace(name))
+                return new JsonResult(new { success = false, message = "Name is required" });
+            if (string.IsNullOrWhiteSpace(sex))
+                return new JsonResult(new { success = false, message = "Gender is required" });
+            if (string.IsNullOrWhiteSpace(prof1))
+                return new JsonResult(new { success = false, message = "Primary Profession is required" });
+            if (salary <= 0)
+                return new JsonResult(new { success = false, message = "Salary must be greater than zero" });
+
+            var programmer = new Programmer
+            {
+                ID = id,
+                NAME = name,
+                DOB = dobDt,
+                DOJ = dojDt,
+                SEX = sex,
+                PROF1 = prof1,
+                PROF2 = prof2,
+                SALARY = salary
+            };
+
+            var updated = await _repository.UpdateProgrammerAsync(programmer);
+            if (!updated)
+            {
+                return new JsonResult(new { success = false, message = "Failed to update programmer" });
+            }
+
+            return new JsonResult(new { success = true });
+        }
+
+        public async Task<IActionResult> OnPostDeleteProgrammerAsync(int id)
+        {
+            var deleted = await _repository.DeleteProgrammerAsync(id);
+            if (!deleted)
+            {
+                return new JsonResult(new { success = false, message = "Failed to delete programmer" });
+            }
+            return new JsonResult(new { success = true });
         }
     }
 }

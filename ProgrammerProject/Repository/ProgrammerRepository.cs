@@ -4,6 +4,7 @@ using ProgrammerProject.IRepository;
 using ProgrammerProject.Models;
 using System.Data;
 
+
 namespace ProgrammerProject.Repository
 {
     public class ProgrammerRepository : IProgrammerRepository
@@ -57,23 +58,35 @@ namespace ProgrammerProject.Repository
         public async Task<bool> UpdateProgrammerAsync(Programmer programmer)
         {
             using var connection = new SqlConnection(_connectionString);
-            var rowsAffected = await connection.ExecuteAsync(
+            var parameters = new
+            {
+                ID = programmer.ID,
+                NAME = programmer.NAME,
+                DOB = programmer.DOB,
+                DOJ = programmer.DOJ,
+                SEX = programmer.SEX,
+                PROF1 = programmer.PROF1,
+                PROF2 = programmer.PROF2,
+                SALARY = programmer.SALARY
+            };
+
+            var result = await connection.QuerySingleAsync<int>(
                 "sp_UpdateProgrammer",
-                programmer,
+                parameters,
                 commandType: CommandType.StoredProcedure);
 
-            return rowsAffected > 0;
+            return result > 0;
         }
 
         public async Task<bool> DeleteProgrammerAsync(int id)
         {
             using var connection = new SqlConnection(_connectionString);
-            var rowsAffected = await connection.ExecuteAsync(
+            var result = await connection.QuerySingleAsync<int>(
                 "sp_DeleteProgrammer",
                 new { ID = id },
                 commandType: CommandType.StoredProcedure);
 
-            return rowsAffected > 0;
+            return result > 0;
         }
     }
 }
