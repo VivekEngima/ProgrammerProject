@@ -91,7 +91,6 @@ function displayProgrammers(programmers) {
     });
 }
 
-// FIX: Submit new programmer with individual parameters
 function submitProgrammer() {
     // Get form values directly
     const name = $('#name').val();
@@ -102,8 +101,25 @@ function submitProgrammer() {
     const prof2 = $('#prof2').val();
     const salary = $('#salary').val();
 
-    // Clear previous validation
+    // validation
     clearValidation('#addProgrammerForm');
+
+    // DOB Age validation (must be 18+)
+    const dobAge = calculateAge(dob);
+    if (dobAge < 18) {
+        $('#dob').addClass('is-invalid');
+        $('#dob').siblings('.invalid-feedback').text('Programmer must be at least 18 years old');
+        return;
+    }
+
+    // DOJ Age validation (must be 18+ when joined)
+    const dojAge = calculateAge(doj);
+    if (dojAge < 18) {
+        $('#doj').addClass('is-invalid');
+        $('#doj').siblings('.invalid-feedback').text('Programmer must be at least 18 years old when joining');
+        return;
+    }
+
     setSubmitButtonLoading(true);
 
     $.ajax({
@@ -124,6 +140,12 @@ function submitProgrammer() {
         success: function (response) {
             if (response.success) {
                 $('#addProgrammerModal').modal('hide');
+                setTimeout(() => {
+                    $('.modal-backdrop').remove();
+                    $('body').removeClass('modal-open');
+                    $('body').css('overflow', '');
+                    $('body').css('padding-right', '');
+                }, 300);
                 $('#addProgrammerForm')[0].reset();
                 loadProgrammers();
                 showAlert('Programmer added successfully!', 'success');
@@ -137,9 +159,12 @@ function submitProgrammer() {
             setSubmitButtonLoading(false);
         }
     });
+    $('.modal').removeClass('show');
+    $('.modal-backdrop').remove();
+    $('body').removeClass('modal-open').removeAttr('style');
 }
 
-// Edit programmer - load data and show modal
+// Edit programmer and show modal
 function editProgrammer(id) {
     $.ajax({
         url: `/Programmers?handler=Programmer&id=${id}`,
@@ -170,54 +195,6 @@ function populateEditForm(programmer) {
     $('#editSalary').val(programmer.salary);
 }
 
-// FIX: Update programmer with individual parameters
-function updateProgrammer() {
-    // Get form values directly
-    const id = $('#editId').val();
-    const name = $('#editName').val();
-    const dob = $('#editDob').val();
-    const doj = $('#editDoj').val();
-    const sex = $('#editSex').val();
-    const prof1 = $('#editProf1').val();
-    const prof2 = $('#editProf2').val();
-    const salary = $('#editSalary').val();
-
-    clearValidation('#editProgrammerForm');
-    setUpdateButtonLoading(true);
-
-    $.ajax({
-        url: '/Programmers?handler=UpdateProgrammer',
-        type: 'POST',
-        data: {
-            id: id,
-            name: name,
-            dob: dob,
-            doj: doj,
-            sex: sex,
-            prof1: prof1,
-            prof2: prof2,
-            salary: salary
-        },
-        headers: {
-            'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
-        },
-        success: function (response) {
-            if (response.success) {
-                $('#editProgrammerModal').modal('hide');
-                loadProgrammers();
-                showAlert('Programmer updated successfully!', 'success');
-            } else {
-                showAlert('Error: ' + response.message, 'danger');
-            }
-            setUpdateButtonLoading(false);
-        },
-        error: function (xhr, status, error) {
-            showAlert('Error updating programmer: ' + error, 'danger');
-            setUpdateButtonLoading(false);
-        }
-    });
-}
-
 // Show delete confirmation modal
 function confirmDelete(id, name) {
     currentDeleteId = id;
@@ -240,7 +217,7 @@ function deleteProgrammer() {
         },
         success: function (response) {
             if (response.success) {
-                $('#deleteProgrammerModal').modal('hide');
+                closeModalProperly('#deleteProgrammerModal')
                 loadProgrammers();
                 showAlert('Programmer deleted successfully!', 'success');
             } else {
@@ -255,6 +232,27 @@ function deleteProgrammer() {
         }
     });
 }
+
+function closeModalProperly(modalId) {
+    $(modalId).modal('hide');
+
+    // Wait for Bootstrap animation to complete, then clean up
+    setTimeout(() => {
+        // Remove any leftover backdrops
+        $('.modal-backdrop').remove();
+
+        // Remove modal-open class and reset body styles
+        $('body').removeClass('modal-open');
+        $('body').css({
+            'overflow': '',
+            'padding-right': ''
+        });
+
+        // Ensure modal is hidden
+        $(modalId).removeClass('show');
+    }, 350); // Bootstrap uses 300ms transition, we use 350ms to be safe
+}
+
 
 // Clear form validation
 function clearValidation(formSelector) {
@@ -394,6 +392,7 @@ function submitProgrammer() {
         success(response) {
             if (response.success) {
                 $('#addProgrammerModal').modal('hide');
+                closeModalProperly('#addProgrammerModal')
                 $('#addProgrammerForm')[0].reset();
                 loadProgrammers();
                 showAlert('Programmer added successfully!', 'success');
@@ -420,13 +419,23 @@ function updateProgrammer() {
     const prof2 = $('#editProf2').val();
     const salary = $('#editSalary').val();
 
+
+
     clearValidation('#editProgrammerForm');
 
-    // Age validation
-    const age = calculateAge(dob);
-    if (age < 18) {
+    // DOB Age validation (must be 18+)
+    const dobAge = calculateAge(dob);
+    if (dobAge < 18) {
         $('#editDob').addClass('is-invalid');
         $('#editDob').siblings('.invalid-feedback').text('Programmer must be at least 18 years old');
+        return;
+    }
+
+    // DOJ Age validation (must be 18+ when joined)
+    const dojAge = calculateAge(doj);
+    if (dojAge < 18) {
+        $('#editDoj').addClass('is-invalid');
+        $('#editDoj').siblings('.invalid-feedback').text('Programmer must be at least 18 years old when joining');
         return;
     }
 
@@ -439,7 +448,7 @@ function updateProgrammer() {
         headers: { 'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val() },
         success(response) {
             if (response.success) {
-                $('#editProgrammerModal').modal('hide');
+                closeModalProperly('#editProgrammerModal')
                 loadProgrammers();
                 showAlert('Programmer updated successfully!', 'success');
             } else {
@@ -452,4 +461,7 @@ function updateProgrammer() {
             setUpdateButtonLoading(false);
         }
     });
+    $('.modal').removeClass('show');
+    $('.modal-backdrop').remove();
+    $('body').removeClass('modal-open').removeAttr('style');
 }

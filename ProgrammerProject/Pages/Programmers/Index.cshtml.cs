@@ -72,8 +72,7 @@ namespace ProgrammerProject.Pages.Programmers
                 return new JsonResult(new { success = false, message = "Name is required" });
             if (string.IsNullOrWhiteSpace(sex))
                 return new JsonResult(new { success = false, message = "Gender is required" });
-            if (string.IsNullOrWhiteSpace(prof1))
-                return new JsonResult(new { success = false, message = "Primary Profession is required" });
+            
             if (salary <= 0)
                 return new JsonResult(new { success = false, message = "Salary must be greater than zero" });
 
@@ -121,8 +120,7 @@ namespace ProgrammerProject.Pages.Programmers
                 return new JsonResult(new { success = false, message = "Name is required" });
             if (string.IsNullOrWhiteSpace(sex))
                 return new JsonResult(new { success = false, message = "Gender is required" });
-            if (string.IsNullOrWhiteSpace(prof1))
-                return new JsonResult(new { success = false, message = "Primary Profession is required" });
+            
             if (salary <= 0)
                 return new JsonResult(new { success = false, message = "Salary must be greater than zero" });
 

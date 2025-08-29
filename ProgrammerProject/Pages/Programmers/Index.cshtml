@@ -6,30 +6,24 @@
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
 
 <div class="container-fluid mt-4">
-    <!-- Header -->
-    <div class="row mb-4">
+    <div class="row mb-4 align-items-center">
         <div class="col">
-            <h1 class="display-6">Programmer Management</h1>
+            <h1 class="display-6 mb-0">Programmer Management</h1>
         </div>
-    </div>
-
-    <!-- Action Bar -->
-    <div class="row mb-3">
-        <div class="col">
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addProgrammerModal">
-                <i class="bi bi-plus-circle me-2"></i>Add New Programmer
+        <div class="col-auto">
+            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addProgrammerModal">
+                <i class="bi bi-plus-lg me-2"></i>
+                Add New Programmer
             </button>
         </div>
     </div>
+
 
     <!-- Alert Container -->
     <div id="alertContainer"></div>
 
     <!-- Loading State -->
     <div id="loadingState" class="text-center py-4" style="display: none;">
-        <div class="spinner-border text-primary" role="status">
-            <span class="visually-hidden">Loading...</span>
-        </div>
         <p class="mt-2">Loading programmer data...</p>
     </div>
 

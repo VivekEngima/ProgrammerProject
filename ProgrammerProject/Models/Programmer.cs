@@ -21,7 +21,6 @@ namespace ProgrammerProject.Models
         [Required(ErrorMessage = "Gender is required")]
         public string SEX { get; set; }
 
-        [Required(ErrorMessage = "Primary Profession is required")]
         [StringLength(50)]
         public string PROF1 { get; set; }
 
