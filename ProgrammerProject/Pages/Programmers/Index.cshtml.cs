@@ -8,11 +8,11 @@ namespace ProgrammerProject.Pages.Programmers
 {
     public class IndexModel : PageModel
     {
-        private readonly IProgrammerRepository _repository;
+        private readonly IProgrammerRepository _programmer;
 
         public IndexModel(IProgrammerRepository repository)
         {
-            _repository = repository;
+            _programmer = repository;
         }
 
         public IEnumerable<Programmer> Programmers { get; set; } = new List<Programmer>();
@@ -25,18 +25,18 @@ namespace ProgrammerProject.Pages.Programmers
 
         public async Task OnGetAsync()
         {
-            Programmers = await _repository.GetAllProgrammersAsync();
+            Programmers = await _programmer.GetAllProgrammersAsync();
         }
 
         public async Task<IActionResult> OnGetProgrammersAsync()
         {
-            var programmers = await _repository.GetAllProgrammersAsync();
+            var programmers = await _programmer.GetAllProgrammersAsync();
             return new JsonResult(programmers);
         }
 
         public async Task<IActionResult> OnGetProgrammerAsync(int id)
         {
-            var programmer = await _repository.GetProgrammerByIdAsync(id);
+            var programmer = await _programmer.GetProgrammerByIdAsync(id);
             if (programmer == null)
             {
                 return new JsonResult(new { success = false, message = "Programmer not found" });
@@ -51,7 +51,7 @@ namespace ProgrammerProject.Pages.Programmers
             string sex,
             string prof1,
             string? prof2,
-            decimal salary)
+            int salary)
         {
             // Parse Date of Birth
             if (!DateTime.TryParseExact(dob, "dd-MM-yyyy", CultureInfo.InvariantCulture,
@@ -72,7 +72,7 @@ namespace ProgrammerProject.Pages.Programmers
                 return new JsonResult(new { success = false, message = "Name is required" });
             if (string.IsNullOrWhiteSpace(sex))
                 return new JsonResult(new { success = false, message = "Gender is required" });
-            
+
             if (salary <= 0)
                 return new JsonResult(new { success = false, message = "Salary must be greater than zero" });
 
@@ -87,19 +87,18 @@ namespace ProgrammerProject.Pages.Programmers
                 SALARY = salary
             };
 
-            var newId = await _repository.AddProgrammerAsync(programmer);
+            var newId = await _programmer.AddProgrammerAsync(programmer);
             return new JsonResult(new { success = true, id = newId });
         }
-
         public async Task<IActionResult> OnPostUpdateProgrammerAsync(
             int id,
             string name,
-            string dob,      // e.g. "31-08-2025"
-            string doj,      // e.g. "10-03-2020"
+            string dob,
+            string doj,
             string sex,
             string prof1,
             string? prof2,
-            decimal salary)
+            int salary)
         {
             // Parse Date of Birth
             if (!DateTime.TryParseExact(dob, "dd-MM-yyyy", CultureInfo.InvariantCulture,
@@ -120,7 +119,7 @@ namespace ProgrammerProject.Pages.Programmers
                 return new JsonResult(new { success = false, message = "Name is required" });
             if (string.IsNullOrWhiteSpace(sex))
                 return new JsonResult(new { success = false, message = "Gender is required" });
-            
+
             if (salary <= 0)
                 return new JsonResult(new { success = false, message = "Salary must be greater than zero" });
 
@@ -136,7 +135,7 @@ namespace ProgrammerProject.Pages.Programmers
                 SALARY = salary
             };
 
-            var updated = await _repository.UpdateProgrammerAsync(programmer);
+            var updated = await _programmer.UpdateProgrammerAsync(programmer);
             if (!updated)
             {
                 return new JsonResult(new { success = false, message = "Failed to update programmer" });
@@ -144,10 +143,9 @@ namespace ProgrammerProject.Pages.Programmers
 
             return new JsonResult(new { success = true });
         }
-
         public async Task<IActionResult> OnPostDeleteProgrammerAsync(int id)
         {
-            var deleted = await _repository.DeleteProgrammerAsync(id);
+            var deleted = await _programmer.DeleteProgrammerAsync(id);
             if (!deleted)
             {
                 return new JsonResult(new { success = false, message = "Failed to delete programmer" });

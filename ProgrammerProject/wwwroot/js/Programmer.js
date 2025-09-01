@@ -1,4 +1,4 @@
-﻿// Programmer Management - AJAX Implementation with Edit/Delete
+﻿// Programmer Management - AJAX Implementation with CRUD
 let currentDeleteId = null;
 
 $(document).ready(function () {
@@ -23,7 +23,7 @@ function initializeForms() {
     // Edit form
     $('#editProgrammerForm').on('submit', function (e) {
         e.preventDefault();
-        
+
         updateProgrammer();
     });
 
@@ -32,7 +32,6 @@ function initializeForms() {
         deleteProgrammer();
     });
 }
-
 // Load all programmers from server
 function loadProgrammers() {
     showLoading(true);
@@ -50,7 +49,6 @@ function loadProgrammers() {
         }
     });
 }
-
 // Display programmers in table with action buttons
 function displayProgrammers(programmers) {
     const tbody = $('#programmersTableBody');
@@ -67,31 +65,31 @@ function displayProgrammers(programmers) {
         return;
     }
 
-    programmers.forEach(programmer => {
+    programmers.forEach((programmer, i) => {
         const row = `
-            <tr>
-                <td>${programmer.id}</td>
-                <td>${programmer.name}</td>
-                <td>${formatDate(programmer.dob)}</td>
-                <td>${formatDate(programmer.doj)}</td>
-                <td>${programmer.sex}</td>
-                <td>${programmer.proF1 || '-'}</td>
-                <td>${programmer.proF2 || '-'}</td>
-                <td>${programmer.salary}</td>
-                <td>
-                    <button class="btn btn-sm btn-outline-primary me-1" onclick="editProgrammer(${programmer.id})" title="Edit">
-                        <i class="bi bi-pencil-square"></i>
-                    </button>
-                    <button class="btn btn-sm btn-outline-danger" onclick="confirmDelete(${programmer.id}, '${programmer.name}')" title="Delete">
-                        <i class="bi bi-trash3"></i>
-                    </button>
-                </td>
-            </tr>
-        `;
+        <tr>
+            <td>${i + 1}</td>
+            <td>${programmer.name}</td>
+            <td>${formatDate(programmer.dob)}</td>
+            <td>${formatDate(programmer.doj)}</td>
+            <td>${programmer.sex}</td>
+            <td>${programmer.proF1 || '-'}</td>
+            <td>${programmer.proF2 || '-'}</td>
+            <td>${programmer.salary}</td>
+            <td>
+                <button class="btn btn-sm btn-outline-primary me-1" onclick="editProgrammer(${programmer.id})" title="Edit">
+                    <i class="bi bi-pencil-square"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-danger" onclick="confirmDelete(${programmer.id}, '${programmer.name}')" title="Delete">
+                    <i class="bi bi-trash3"></i>
+                </button>
+            </td>
+        </tr>
+    `;
         tbody.append(row);
     });
-}
 
+}
 // Calculate age at a specific date given dd-mm-yyyy strings
 function calculateAgeAtDate(dobString, atDateString) {
     if (!dobString || !atDateString) return -1;
@@ -116,7 +114,6 @@ function calculateAgeAtDate(dobString, atDateString) {
 
     return age;
 }
-
 // Calculate current age given a dd-mm-yyyy string
 function calculateAge(dobString) {
     if (!dobString) return -1;
@@ -126,7 +123,6 @@ function calculateAge(dobString) {
 
     return calculateAgeAtDate(dobString, todayString);
 }
-
 // Enhanced submitProgrammer with proper validation
 function submitProgrammer() {
     const name = $('#name').val().trim();
@@ -203,7 +199,6 @@ function submitProgrammer() {
         }
     });
 }
-
 // Edit programmer - load data and show modal
 function editProgrammer(id) {
 
@@ -233,7 +228,7 @@ function populateEditForm(programmer) {
     const dobFormatted = formatDateForInput(programmer.dob);
     const dojFormatted = formatDateForInput(programmer.doj);
 
-  
+
     $('#editDob').val(dobFormatted).datepicker('update', dobFormatted);
     $('#editDoj').val(dojFormatted).datepicker('update', dojFormatted);
 
@@ -241,7 +236,6 @@ function populateEditForm(programmer) {
     $('#editProf2').val(programmer.proF2 || '');
     $('#editSalary').val(programmer.salary);
 }
-
 function formatDateForInput(dateString) {
     if (!dateString) return '';
     const [datePart] = dateString.split('T');  // take only yyyy-mm-dd
@@ -249,11 +243,9 @@ function formatDateForInput(dateString) {
     return `${day}-${month}-${year}`; // dd-mm-yyyy
 }
 
-
-
 // Enhanced updateProgrammer with proper validation
 function updateProgrammer() {
-    
+
     const id = $('#editId').val();
     const name = $('#editName').val().trim();
     const dob = $('#editDob').val();
@@ -371,7 +363,6 @@ function deleteProgrammer() {
         }
     });
 }
-
 function closeModalProperly(modalId) {
     $(modalId).modal('hide');
 
@@ -391,12 +382,10 @@ function closeModalProperly(modalId) {
         $(modalId).removeClass('show');
     }, 350);
 }
-
 function showFieldError(fieldSelector, message) {
     $(fieldSelector).addClass('is-invalid');
     $(fieldSelector).siblings('.invalid-feedback').text(message);
 }
-
 // Clear form validation
 function clearValidation(formSelector) {
     $(`${formSelector} .form-control`).removeClass('is-invalid');
@@ -416,7 +405,6 @@ function setSubmitButtonLoading(loading) {
         btn.text('Add Programmer');
     }
 }
-
 function setUpdateButtonLoading(loading) {
     const btn = $('#updateBtn');
     const spinner = btn.find('.spinner-border');
@@ -431,7 +419,6 @@ function setUpdateButtonLoading(loading) {
         btn.text('Update Programmer');
     }
 }
-
 function setDeleteButtonLoading(loading) {
     const btn = $('#confirmDeleteBtn');
     const spinner = btn.find('.spinner-border');
@@ -457,7 +444,6 @@ function showLoading(show) {
         $('#programmersTable').show();
     }
 }
-
 function showAlert(message, type) {
     const alert = `
         <div class="alert alert-${type} alert-dismissible fade show" role="alert">
@@ -474,19 +460,16 @@ function showAlert(message, type) {
         }, 3000);
     }
 }
-
 function formatDate(dateString) {
     const [datePart] = dateString.split('T');
     const [year, month, day] = datePart.split('-');
     return `${day}-${month}-${year}`;
 }
-
 function formatDateForInput(dateString) {
     const [datePart] = dateString.split('T');
     const [year, month, day] = datePart.split('-');
     return `${day}-${month}-${year}`;
 }
-
 function formatNumber(number) {
     return new Intl.NumberFormat().format(number);
 }

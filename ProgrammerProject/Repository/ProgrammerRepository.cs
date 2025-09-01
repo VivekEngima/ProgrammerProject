@@ -15,7 +15,6 @@ namespace ProgrammerProject.Repository
         {
             _connectionString = configuration.GetConnectionString("DefaultConnection");
         }
-
         public async Task<IEnumerable<Programmer>> GetAllProgrammersAsync()
         {
             using var connection = new SqlConnection(_connectionString);
@@ -23,16 +22,6 @@ namespace ProgrammerProject.Repository
                 "sp_GetAllProgrammers",
                 commandType: CommandType.StoredProcedure);
         }
-
-        public async Task<Programmer> GetProgrammerByIdAsync(int id)
-        {
-            using var connection = new SqlConnection(_connectionString);
-            return await connection.QueryFirstOrDefaultAsync<Programmer>(
-                "sp_GetProgrammerById",
-                new { ID = id },
-                commandType: CommandType.StoredProcedure);
-        }
-
         public async Task<int> AddProgrammerAsync(Programmer programmer)
         {
             using var connection = new SqlConnection(_connectionString);
@@ -54,7 +43,14 @@ namespace ProgrammerProject.Repository
 
             return result;
         }
-
+        public async Task<Programmer> GetProgrammerByIdAsync(int id)
+        {
+            using var connection = new SqlConnection(_connectionString);
+            return await connection.QueryFirstOrDefaultAsync<Programmer>(
+                "sp_GetProgrammerById",
+                new { ID = id },
+                commandType: CommandType.StoredProcedure);
+        }
         public async Task<bool> UpdateProgrammerAsync(Programmer programmer)
         {
             using var connection = new SqlConnection(_connectionString);
@@ -77,7 +73,6 @@ namespace ProgrammerProject.Repository
 
             return result > 0;
         }
-
         public async Task<bool> DeleteProgrammerAsync(int id)
         {
             using var connection = new SqlConnection(_connectionString);

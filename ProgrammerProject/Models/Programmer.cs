@@ -29,6 +29,6 @@ namespace ProgrammerProject.Models
 
         [Required(ErrorMessage = "Salary is required")]
         [Range(0, double.MaxValue, ErrorMessage = "Salary must be positive")]
-        public decimal SALARY { get; set; }
+        public int SALARY { get; set; }
     }
 }
