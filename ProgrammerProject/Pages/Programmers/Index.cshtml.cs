@@ -49,7 +49,7 @@ namespace ProgrammerProject.Pages.Programmers
             string dob,
             string doj,
             string sex,
-            string prof1,
+            string? prof1,
             string? prof2,
             int salary)
         {
@@ -96,7 +96,7 @@ namespace ProgrammerProject.Pages.Programmers
             string dob,
             string doj,
             string sex,
-            string prof1,
+            string? prof1,
             string? prof2,
             int salary)
         {

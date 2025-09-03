@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using ProgrammerProject.IRepository;
 using ProgrammerProject.Models;
-using System.Globalization;
 
 namespace ProgrammerProject.Pages.Studies
 {
@@ -65,8 +64,8 @@ namespace ProgrammerProject.Pages.Studies
             var study = new Study
             {
                 name = name.Trim(),
-                splace = string.IsNullOrWhiteSpace(splace) ? null : splace.Trim(),
-                course = string.IsNullOrWhiteSpace(course) ? null : course.Trim(),
+                splace = splace.Trim(),
+                course = course.Trim(),
                 ccost = ccost
             };
 
@@ -102,8 +101,8 @@ namespace ProgrammerProject.Pages.Studies
             var study = new Study
             {
                 name = name.Trim(),
-                splace = string.IsNullOrWhiteSpace(splace) ? null : splace.Trim(),
-                course = string.IsNullOrWhiteSpace(course) ? null : course.Trim(),
+                splace = splace.Trim(),
+                course = course.Trim(),
                 ccost = ccost
             };
 

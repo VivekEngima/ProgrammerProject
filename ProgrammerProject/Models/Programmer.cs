@@ -28,7 +28,7 @@ namespace ProgrammerProject.Models
         public string PROF2 { get; set; }
 
         [Required(ErrorMessage = "Salary is required")]
-        [Range(0, double.MaxValue, ErrorMessage = "Salary must be positive")]
+        [Range(0, int.MaxValue, ErrorMessage = "Salary must be positive")]
         public int SALARY { get; set; }
     }
 }
