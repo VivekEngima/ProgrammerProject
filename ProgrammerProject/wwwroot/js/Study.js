@@ -1,7 +1,7 @@
-﻿// Studies Management - AJAX Implementation with CRUD
+﻿// Study Management - AJAX Implementation with CRUD (Exact same UI as Programmer.js)
 let currentDeleteName = null;
 
-document.addEventListener('DOMContentLoaded', function () {
+$(document).ready(function () {
     loadStudies();
     initializeForms();
 });
@@ -9,19 +9,19 @@ document.addEventListener('DOMContentLoaded', function () {
 // Initialize all form handlers
 function initializeForms() {
     // Add form
-    document.getElementById('addStudyForm').addEventListener('submit', function (e) {
+    $('#addStudyForm').on('submit', function (e) {
         e.preventDefault();
         submitStudy();
     });
 
     // Edit form
-    document.getElementById('editStudyForm').addEventListener('submit', function (e) {
+    $('#editStudyForm').on('submit', function (e) {
         e.preventDefault();
         updateStudy();
     });
 
     // Delete confirmation
-    document.getElementById('confirmDeleteBtn').addEventListener('click', function () {
+    $('#confirmDeleteBtn').on('click', function () {
         deleteStudy();
     });
 }
@@ -51,12 +51,14 @@ function displayStudies(studies) {
 
     if (studies.length === 0) {
         tbody.append(`
-            <tr><td colspan="5" class="text-center text-muted">No studies found</td></tr>
+            <tr>
+                <td colspan="6" class="text-center">No studies found</td>
+            </tr>
         `);
         return;
     }
 
-    studies.forEach((study,i) => {
+    studies.forEach((study, i) => {
         const row = `
             <tr>
                 <td>${i + 1}</td>
@@ -65,11 +67,11 @@ function displayStudies(studies) {
                 <td>${study.course}</td>
                 <td>${study.ccost}</td>
                 <td>
-                    <button class="btn btn-sm btn-outline-primary me-1" onclick="editStudy('${study.name}')">
-                        <i class="bi bi-pencil-square"></i>
+                    <button class="btn btn-sm btn-primary me-1" onclick="editStudy('${study.name}')">
+                        Edit
                     </button>
-                    <button class="btn btn-sm btn-outline-danger" onclick="confirmDelete('${study.name}')">
-                        <i class="bi bi-trash3"></i>
+                    <button class="btn btn-sm btn-danger" onclick="confirmDelete('${study.name}')">
+                        Delete
                     </button>
                 </td>
             </tr>
@@ -78,7 +80,7 @@ function displayStudies(studies) {
     });
 }
 
-// Submit new study
+// Enhanced submitStudy with proper validation
 function submitStudy() {
     const name = $('#name').val().trim();
     const splace = $('#splace').val().trim();
@@ -92,16 +94,19 @@ function submitStudy() {
         showFieldError('#name', 'Name is required');
         return;
     }
+
     if (!splace) {
-        showFieldError('#splace', 'Studied Place is required');
+        showFieldError('#splace', 'Study Place is required');
         return;
     }
+
     if (!course) {
         showFieldError('#course', 'Course is required');
         return;
     }
-    if (ccost && parseFloat(ccost) < 0) {
-        showFieldError('#ccost', 'Course cost must be positive');
+
+    if (!ccost || parseFloat(ccost) < 0) {
+        showFieldError('#ccost', 'Valid course cost is required');
         return;
     }
 
@@ -110,12 +115,7 @@ function submitStudy() {
     $.ajax({
         url: '/Studies?handler=AddStudy',
         type: 'POST',
-        data: {
-            name,
-            splace: splace,
-            course: course,
-            ccost: ccost
-        },
+        data: { name, splace, course, ccost },
         headers: { 'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val() },
         success: function (response) {
             if (response.success) {
@@ -162,7 +162,7 @@ function populateEditForm(study) {
     $('#editCcost').val(study.ccost);
 }
 
-// Update study
+// Enhanced updateStudy with proper validation
 function updateStudy() {
     const name = $('#editName').val();
     const splace = $('#editSplace').val().trim();
@@ -171,20 +171,24 @@ function updateStudy() {
 
     clearValidation('#editStudyForm');
 
+    // Validate required fields
     if (!name) {
         showFieldError('#editName', 'Name is required');
         return;
     }
+
     if (!splace) {
-        showFieldError('#editSplace', 'Studied Place is required');
+        showFieldError('#editSplace', 'Study Place is required');
         return;
     }
+
     if (!course) {
         showFieldError('#editCourse', 'Course is required');
         return;
     }
-    if (ccost && parseFloat(ccost) < 0) {
-        showFieldError('#editCcost', 'Course cost must be positive');
+
+    if (!ccost || parseFloat(ccost) < 0) {
+        showFieldError('#editCcost', 'Valid course cost is required');
         return;
     }
 
@@ -193,12 +197,7 @@ function updateStudy() {
     $.ajax({
         url: '/Studies?handler=UpdateStudy',
         type: 'POST',
-        data: {
-            name,
-            splace: splace,
-            course: course,
-            ccost: ccost
-        },
+        data: { name, splace, course, ccost },
         headers: { 'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val() },
         success: function (response) {
             if (response.success) {
@@ -254,16 +253,22 @@ function deleteStudy() {
     });
 }
 
-// Utility functions (same as Programmer.js)
+// Modal management - EXACT same as Programmer.js
 function closeModalProperly(modalId) {
     $(modalId).modal('hide');
+
     setTimeout(() => {
+        // Remove any lingering backdrop
         $('.modal-backdrop').remove();
+
+        // Reset body state
         $('body').removeClass('modal-open');
         $('body').css({
             'overflow': '',
             'padding-right': ''
         });
+
+        // Ensure modal is hidden
         $(modalId).removeClass('show');
     }, 350);
 }
@@ -273,6 +278,7 @@ function showFieldError(fieldSelector, message) {
     $(fieldSelector).siblings('.invalid-feedback').text(message);
 }
 
+// Clear form validation
 function clearValidation(formSelector) {
     $(`${formSelector} .form-control`).removeClass('is-invalid');
     $(`${formSelector} .invalid-feedback`).text('');
@@ -284,18 +290,12 @@ function setSubmitButtonLoading(loading) {
 
     if (loading) {
         btn.prop('disabled', true);
-        spinner.removeClass('d-none');
-        btn.contents().filter(function () {
-            return this.nodeType === 3;
-        }).remove();
-        btn.append(' Adding...');
+        spinner.show();
+        btn.text(' Adding...');
     } else {
         btn.prop('disabled', false);
-        spinner.addClass('d-none');
-        btn.contents().filter(function () {
-            return this.nodeType === 3;
-        }).remove();
-        btn.append('Add Study');
+        spinner.hide();
+        btn.text('Add Study');
     }
 }
 
@@ -305,18 +305,12 @@ function setUpdateButtonLoading(loading) {
 
     if (loading) {
         btn.prop('disabled', true);
-        spinner.removeClass('d-none');
-        btn.contents().filter(function () {
-            return this.nodeType === 3;
-        }).remove();
-        btn.append(' Updating...');
+        spinner.show();
+        btn.text(' Updating...');
     } else {
         btn.prop('disabled', false);
-        spinner.addClass('d-none');
-        btn.contents().filter(function () {
-            return this.nodeType === 3;
-        }).remove();
-        btn.append('Update Study');
+        spinner.hide();
+        btn.text('Update Study');
     }
 }
 
@@ -326,21 +320,16 @@ function setDeleteButtonLoading(loading) {
 
     if (loading) {
         btn.prop('disabled', true);
-        spinner.removeClass('d-none');
-        btn.contents().filter(function () {
-            return this.nodeType === 3;
-        }).remove();
-        btn.append(' Deleting...');
+        spinner.show();
+        btn.text(' Deleting...');
     } else {
         btn.prop('disabled', false);
-        spinner.addClass('d-none');
-        btn.contents().filter(function () {
-            return this.nodeType === 3;
-        }).remove();
-        btn.append('Delete Study');
+        spinner.hide();
+        btn.text('Delete Study');
     }
 }
 
+// Utility functions - EXACT same as Programmer.js
 function showLoading(show) {
     if (show) {
         $('#loadingState').show();
@@ -364,6 +353,10 @@ function showAlert(message, type) {
     if (type === 'success') {
         setTimeout(() => {
             $('.alert').alert('close');
-        }, 2500);
+        }, 3000);
     }
+}
+
+function formatNumber(number) {
+    return new Intl.NumberFormat().format(number);
 }
