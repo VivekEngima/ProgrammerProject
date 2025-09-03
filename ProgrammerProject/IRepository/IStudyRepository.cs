@@ -9,5 +9,8 @@ namespace ProgrammerProject.IRepository
         Task<string> AddStudyAsync(Study study);
         Task<bool> UpdateStudyAsync(Study study);
         Task<bool> DeleteStudyAsync(string name);
+
+        // Validation
+        Task<bool> StudyExistsForNameAsync(string name);
     }
 }

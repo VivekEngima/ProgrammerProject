@@ -8,13 +8,16 @@ namespace ProgrammerProject.Pages.Studies
     public class IndexModel : PageModel
     {
         private readonly IStudyRepository _repository;
+        private readonly IProgrammerRepository _programmerRepository;
 
-        public IndexModel(IStudyRepository repository)
+        public IndexModel(IStudyRepository repository, IProgrammerRepository programmerRepository)
         {
             _repository = repository;
+            _programmerRepository = programmerRepository;
         }
 
         public IEnumerable<Study> Studies { get; set; } = new List<Study>();
+        public IEnumerable<string> ProgrammerNames { get; set; } = new List<string>();
 
         [BindProperty]
         public Study NewStudy { get; set; } = new();
@@ -25,12 +28,18 @@ namespace ProgrammerProject.Pages.Studies
         public async Task OnGetAsync()
         {
             Studies = await _repository.GetAllStudiesAsync();
+            ProgrammerNames = await _programmerRepository.GetAllProgrammersNameAsync();
         }
 
         public async Task<IActionResult> OnGetStudiesAsync()
         {
             var studies = await _repository.GetAllStudiesAsync();
             return new JsonResult(studies);
+        }
+        public async Task<IActionResult> OnGetProgrammerNamesAsync()
+        {
+            var names = await _programmerRepository.GetAllProgrammersNameAsync();
+            return new JsonResult(names);
         }
 
         public async Task<IActionResult> OnGetStudyAsync(string name)

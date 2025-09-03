@@ -25,6 +25,11 @@ namespace ProgrammerProject.Repository
         public async Task<int> AddProgrammerAsync(Programmer programmer)
         {
             using var connection = new SqlConnection(_connectionString);
+
+            // Duplicate name validation check
+            var NameExists = await ProgrammerNameExistsAsync(programmer.NAME);
+            if (NameExists) throw new InvalidOperationException($"Another programmer name {NameExists} already exists, Try new name!");
+
             var parameters = new
             {
                 NAME = programmer.NAME,
@@ -41,7 +46,7 @@ namespace ProgrammerProject.Repository
                 parameters,
                 commandType: CommandType.StoredProcedure);
 
-            return result;
+            return Convert.ToInt32(result);
         }
         public async Task<Programmer> GetProgrammerByIdAsync(int id)
         {
@@ -54,6 +59,10 @@ namespace ProgrammerProject.Repository
         public async Task<bool> UpdateProgrammerAsync(Programmer programmer)
         {
             using var connection = new SqlConnection(_connectionString);
+
+            var nameExists = await ProgrammerNameExistsAsync(programmer.NAME, programmer.ID);
+            if (nameExists) throw new InvalidOperationException($"Another programmer with name '{programmer.NAME}' already exists.");
+
             var parameters = new
             {
                 ID = programmer.ID,
@@ -82,6 +91,32 @@ namespace ProgrammerProject.Repository
                 commandType: CommandType.StoredProcedure);
 
             return result > 0;
+        }
+
+        public async Task<bool> ProgrammerNameExistsAsync(string name)
+        {
+            using var connection = new SqlConnection(_connectionString);
+
+            var count = await connection.QueryFirstAsync("SELECT COUNT(1) FROM Programmer WHERE UPPER(NAME) = UPPER(@Name)", new { Name = name });
+            return count > 0;
+        }
+
+        public async Task<bool> ProgrammerNameExistsAsync(string name, int excludeId)
+        {
+            using var connection = new SqlConnection(_connectionString);
+            var count = await connection.QuerySingleAsync<int>(
+                "SELECT COUNT(1) FROM Programmer WHERE UPPER(NAME) = UPPER(@Name) AND ID != @excludeId",
+                new { Name = name, ExcludeId = excludeId });
+
+            return count > 0;
+        }
+
+        public async Task<IEnumerable<string>> GetAllProgrammersNameAsync()
+        {
+            using var connection = new SqlConnection(_connectionString);
+            return await connection.QueryAsync<string>(
+                "SELECT NAME FROM Programmer ORDER BY NAME",
+                commandType: CommandType.Text);
         }
     }
 }
